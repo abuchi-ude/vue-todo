@@ -13,7 +13,7 @@
     <button
       v-for="page in totalPages"
       :key="page"
-      class="px-3 py-1 bg-accent rounded"
+      class="px-3 hidden xl:block py-1 bg-accent rounded"
       :class="{
         'bg-primary text-white': page === currentPage,
         'hover:bg-primary/70 hover:text-white': page !== currentPage,
@@ -22,6 +22,9 @@
     >
       {{ page }}
     </button>
+    <p class="xl:hidden">
+      {{ currentPage }} of {{ totalPages }}
+    </p>
 
     <!-- Next -->
     <button

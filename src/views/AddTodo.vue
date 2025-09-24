@@ -36,10 +36,10 @@
           />
         </div>
 
-        <div class="flex justify-between space-x-4 text-lg font-medium">
+        <div class="flex justify-between space-x-4  lg:text-lg font-medium">
           <button
             type="submit"
-            class="flex items-center bg-primary/70 justify-center text-white w-3/5 px-4 py-2 rounded-lg hover:bg-primary/50 disabled:opacity-50"
+            class="flex items-center bg-primary/70 justify-center text-white w-5/10 lg:w-3/5 px-4 py-2 rounded-lg hover:bg-primary/50 disabled:opacity-50"
             :disabled="adding"
           >
             <ph-plus size="16" class="mr-2" color="#ffffff" />
@@ -48,7 +48,7 @@
 
           <RouterLink
             to="/todos"
-            class="px-4 py-2 w-3/10 text-center rounded-lg border border-accent hover:bg-accent"
+            class="px-4 py-2 w-5/10 lg:w-3/10 text-center rounded-lg border border-accent hover:bg-accent"
           >
             View All Todos
           </RouterLink>
@@ -64,7 +64,7 @@
 
     <!-- Tips Section -->
     <section
-      class="space-y-8 border border-accent rounded-xl py-10 px-6 w-[80%]"
+      class="space-y-8 border border-accent rounded-xl py-10 px-6 lg:w-[80%]"
     >
       <h2 class="text-xl font-semibold">Tips for Better Todo Management</h2>
       <ul class="list-disc pl-6 space-y-1 text-lg text-primary/70">

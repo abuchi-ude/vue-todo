@@ -7,8 +7,8 @@
         <p class="text-primary/70 text-xl">Manage and track your tasks</p>
       </div>
       <div>
-        <div v-if="error" class="error">{{ error }}</div>
-        <div v-if="successMessage" class="success">{{ successMessage }}</div>
+        <!-- <div v-if="error" class="error">{{ error }}</div> -->
+        <div v-if="successMessage" class="success hidden lg:block">{{ successMessage }}</div>
       </div>
     </section>
     <section>
@@ -78,8 +78,8 @@
 
             <!-- Otherwise just show title -->
             <template v-else>
-              <div class="flex justify-between items-center lg:text-xl">
-                <div class="flex gap-2 items-center">
+              <div class="flex lg:justify-between flex-col lg:flex-row lg:items-center lg:text-xl">
+                <div class="flex gap-2 items-center mb-2 lg:mb-0">
                   <div
                     @click="updateTodo(todo.id, { completed: !todo.completed })"
                   >
@@ -100,7 +100,7 @@
                   </router-link>
                 </div>
 
-                <div class="flex justify-between items-center">
+                <div class="flex mt-2 justify-between items-center">
                   <button
                     class="text-primary font-medium px-4 py-1 rounded-lg mr-2"
                     :class="[

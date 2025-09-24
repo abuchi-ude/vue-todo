@@ -49,7 +49,7 @@
       </ul>
     </section>
     <section
-      class="space-y-8 border border-accent rounded-xl py-10 px-6 w-[80%]"
+      class="space-y-8 border border-accent rounded-xl py-10 px-6 lg:w-[80%]"
     >
       <h2 class="text-xl font-semibold">Search Tips</h2>
       <ul class="list-disc pl-6 space-y-1 text-lg text-primary/70">

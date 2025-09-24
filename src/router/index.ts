@@ -9,6 +9,7 @@ import Login from "../views/Login.vue";
 import SignUp from "../views/SignUp.vue";
 
 import { auth } from "../firebase"; // import firebase auth
+import { onAuthStateChanged } from "firebase/auth";
 import TodoDetails from "../views/TodoDetails.vue";
 
 const routes = [
@@ -27,11 +28,26 @@ const router = createRouter({
 });
 
 // Global navigation guard
-router.beforeEach((to, _, next) => {
-  const user = auth.currentUser;
+let authResolved = false;
+let currentUser = null;
 
+function waitForAuth() {
+  return new Promise((resolve) => {
+    if (authResolved) {
+      resolve(currentUser);
+    } else {
+      onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        authResolved = true;
+        resolve(user);
+      });
+    }
+  });
+}
+
+router.beforeEach(async (to, _, next) => {
+  const user = await waitForAuth();
   if (to.meta.requiresAuth && !user) {
-    // Not logged in, redirect to login
     next("/login");
   } else {
     next();

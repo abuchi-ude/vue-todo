@@ -52,18 +52,8 @@ const logout = async () => {
 
       <!-- Auth Section -->
       <section class="font-medium">
-        <template v-if="currentUser">
-          <span class="mr-2"
-            >Hello, {{ currentUser.fullName || currentUser.email }}</span
-          >
-          <button
-            @click="logout"
-            class="p-2 text-sm bg-red-500 text-white rounded-md"
-          >
-            Logout
-          </button>
-        </template>
-        <template v-else>
+        
+        <template v-if="!currentUser">
           <RouterLink
             to="/login"
             class="p-2 text-sm hover:bg-gray-300 border-gray-200 border rounded-md mr-2"
@@ -96,6 +86,17 @@ const logout = async () => {
       <RouterLink to="/search" class="p-2 hover:bg-gray-300 rounded-md"
         >Search</RouterLink
       >
+      <template v-if="currentUser">
+          <span class="mr-2"
+            >Hello, {{ currentUser.fullName || currentUser.email }}</span
+          >
+          <button
+            @click="logout"
+            class="p-2 text-sm bg-red-500 text-white rounded-md"
+          >
+            Logout
+          </button>
+        </template>
     </div>
   </div>
 
