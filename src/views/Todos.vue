@@ -60,6 +60,7 @@
                 v-model="editTitle"
                 class="border rounded p-2 mr-2"
                 placeholder="Edit todo title"
+                @keydown.enter="saveEdit(todo.id)"
               />
               <button
                 class="bg-green-500 text-white px-3 py-1 rounded mr-2"

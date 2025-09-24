@@ -33,6 +33,7 @@
             placeholder="Enter your todo title..."
             class="text-lg px-6 autofill-bg-white focus:outline-4 focus:border-1 bg-primary/10 py-3 rounded-xl outline-accent"
             required
+            @keydown.enter="handleAddTodo"
           />
         </div>
 
