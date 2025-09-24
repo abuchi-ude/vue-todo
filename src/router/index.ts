@@ -29,7 +29,7 @@ const router = createRouter({
 
 // Global navigation guard
 let authResolved = false;
-let currentUser = null;
+let currentUser: any = null;
 
 function waitForAuth() {
   return new Promise((resolve) => {

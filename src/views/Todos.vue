@@ -201,7 +201,7 @@ async function saveEdit(id: number) {
     return;
   }
   try {
-    await updateTodo(id, { title: editTitle.value });
+    await updateTodo(String(id), { title: editTitle.value });
     cancelEdit();
   } catch (e) {
     console.error(e);
