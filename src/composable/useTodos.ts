@@ -13,6 +13,7 @@ import {
   orderBy,
   enableIndexedDbPersistence,
 } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // Enable offline persistence
 enableIndexedDbPersistence(db).catch((err) => {
@@ -21,6 +22,8 @@ enableIndexedDbPersistence(db).catch((err) => {
 });
 
 export function useTodos() {
+  // Get current user
+  const auth = getAuth();
   const todos = ref<any[]>([]);
   const localTodos = ref<any[]>([]);
   const fullTodos = ref<any[]>([]);
@@ -45,13 +48,26 @@ export function useTodos() {
     error.value = null;
     successMessage.value = null;
     try {
-      // Fetch all Firebase todos
-      const q = query(collection(db, "todos"), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-      firebaseTodos.value = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      // Fetch only current user's Firebase todos
+      const user = auth.currentUser;
+      let q;
+      if (user) {
+        // Query todos where userId == current user's uid
+        q = query(
+          collection(db, "todos"),
+          orderBy("createdAt", "desc")
+        );
+        const querySnapshot = await getDocs(q);
+        firebaseTodos.value = querySnapshot.docs
+          .map((doc) => {
+            const data = doc.data() as any;
+            return { id: doc.id, ...data };
+          })
+          .filter((todo) => todo.userId === user.uid);
+      } else {
+        // Not logged in, fetch none
+        firebaseTodos.value = [];
+      }
 
       // Fetch all JSONPlaceholder todos (max 200)
       const API_URL = "https://jsonplaceholder.typicode.com/todos";
@@ -84,10 +100,13 @@ export function useTodos() {
     error.value = null;
     successMessage.value = null;
     try {
+      const user = auth.currentUser;
+      if (!user) throw new Error("User not authenticated");
       const newTodo = {
         title,
         completed: false,
         createdAt: Date.now(),
+        userId: user.uid,
       };
       // Add to Firestore
       const docRef = await addDoc(collection(db, "todos"), newTodo);
@@ -112,19 +131,36 @@ export function useTodos() {
     error.value = null;
     successMessage.value = null;
     try {
-      const docRef = doc(db, "todos", id);
-      await updateDoc(docRef, updates);
-      const index = todos.value.findIndex((t) => t.id === id);
-      if (index !== -1)
-        todos.value[index] = { ...todos.value[index], ...updates };
-      const localIndex = localTodos.value.findIndex((t) => t.id === id);
-      if (localIndex !== -1)
-        localTodos.value[localIndex] = {
-          ...localTodos.value[localIndex],
-          ...updates,
-        };
-      successMessage.value = "Todo updated successfully!";
-      return todos.value[index];
+      // Detect if todo is from Firebase or JSONPlaceholder
+      // Firebase IDs are strings, JSONPlaceholder IDs are numbers <= 200
+      const isJsonPlaceholder = !isNaN(Number(id)) && Number(id) <= 200;
+      if (isJsonPlaceholder) {
+        // JSONPlaceholder update (fake, not persisted)
+        const API_URL = `https://jsonplaceholder.typicode.com/todos/${id}`;
+        const res = await fetch(API_URL, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updates),
+        });
+        if (!res.ok) throw new Error("Failed to update JSONPlaceholder todo");
+        // Update local state
+        const index = todos.value.findIndex((t) => t.id === Number(id));
+        if (index !== -1) todos.value[index] = { ...todos.value[index], ...updates };
+        const localIndex = localTodos.value.findIndex((t) => t.id === Number(id));
+        if (localIndex !== -1) localTodos.value[localIndex] = { ...localTodos.value[localIndex], ...updates };
+        successMessage.value = "JSONPlaceholder todo updated (not persisted)!";
+        return todos.value[index];
+      } else {
+        // Firebase update
+        const docRef = doc(db, "todos", id);
+        await updateDoc(docRef, updates);
+        const index = todos.value.findIndex((t) => t.id === id);
+        if (index !== -1) todos.value[index] = { ...todos.value[index], ...updates };
+        const localIndex = localTodos.value.findIndex((t) => t.id === id);
+        if (localIndex !== -1) localTodos.value[localIndex] = { ...localTodos.value[localIndex], ...updates };
+        successMessage.value = "Todo updated successfully!";
+        return todos.value[index];
+      }
     } catch (e: any) {
       error.value = e.message;
       throw e;
@@ -139,13 +175,27 @@ export function useTodos() {
     error.value = null;
     successMessage.value = null;
     try {
-      const docRef = doc(db, "todos", id);
-      await deleteDoc(docRef);
-      todos.value = todos.value.filter((t) => t.id !== id);
-      localTodos.value = localTodos.value.filter((t) => t.id !== id);
-      totalTodos.value--;
-      totalPages.value = Math.ceil(totalTodos.value / limit.value);
-      successMessage.value = "Todo deleted successfully!";
+      const isJsonPlaceholder = !isNaN(Number(id)) && Number(id) <= 200;
+      if (isJsonPlaceholder) {
+        // JSONPlaceholder delete (fake, not persisted)
+        const API_URL = `https://jsonplaceholder.typicode.com/todos/${id}`;
+        const res = await fetch(API_URL, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete JSONPlaceholder todo");
+        todos.value = todos.value.filter((t) => t.id !== Number(id));
+        localTodos.value = localTodos.value.filter((t) => t.id !== Number(id));
+        totalTodos.value--;
+        totalPages.value = Math.ceil(totalTodos.value / limit.value);
+        successMessage.value = "JSONPlaceholder todo deleted (not persisted)!";
+      } else {
+        // Firebase delete
+        const docRef = doc(db, "todos", id);
+        await deleteDoc(docRef);
+        todos.value = todos.value.filter((t) => t.id !== id);
+        localTodos.value = localTodos.value.filter((t) => t.id !== id);
+        totalTodos.value--;
+        totalPages.value = Math.ceil(totalTodos.value / limit.value);
+        successMessage.value = "Todo deleted successfully!";
+      }
     } catch (e: any) {
       error.value = e.message;
       throw e;
